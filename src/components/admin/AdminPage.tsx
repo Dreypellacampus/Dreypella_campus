@@ -1,0 +1,204 @@
+import { type ReactNode } from 'react';
+import { LogOut, ShieldAlert } from 'lucide-react';
+import AdminSignIn from '@/components/admin/AdminSignIn';
+import BulkRequestList from '@/components/admin/BulkRequestList';
+import CustomerList from '@/components/admin/CustomerList';
+import DeliveryPartnerManager from '@/components/admin/DeliveryPartnerManager';
+import EnquiryInbox from '@/components/admin/EnquiryInbox';
+import HostelManager from '@/components/admin/HostelManager';
+import IndividualOrderList from '@/components/admin/IndividualOrderList';
+import InstitutionManager from '@/components/admin/InstitutionManager';
+import PriceManager from '@/components/admin/PriceManager';
+import ServiceOverview from '@/components/admin/ServiceOverview';
+import Button from '@/components/ui/Button';
+import Logo from '@/components/ui/Logo';
+import Link from '@/components/layout/Link';
+import { useAdminSession } from '@/hooks/useAdminSession';
+import { useUnansweredCount } from '@/hooks/useUnansweredCount';
+import { signOut } from '@/lib/auth';
+
+export type AdminSection =
+  | 'bulk-requests'
+  | 'orders'
+  | 'customers'
+  | 'services'
+  | 'pricing'
+  | 'locations'
+  | 'partners'
+  | 'messages'
+  | 'institutions';
+
+const SECTIONS: { value: AdminSection; label: string }[] = [
+  { value: 'bulk-requests', label: 'Bulk requests' },
+  { value: 'orders', label: 'Individual orders' },
+  { value: 'customers', label: 'Customers' },
+  { value: 'services', label: 'Services' },
+  { value: 'pricing', label: 'Prices' },
+  { value: 'locations', label: 'Hostels' },
+  { value: 'partners', label: 'Delivery partners' },
+  { value: 'institutions', label: 'Institutions' },
+  { value: 'messages', label: 'Messages' },
+];
+
+function AdminShell({ children, email, onSignOut }: { children: ReactNode; email?: string; onSignOut?: () => void }) {
+  return (
+    <div className="min-h-screen bg-mist">
+      <header className="border-b border-navy-100 bg-white">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <Link to="/" aria-label="Back to the website">
+            <Logo />
+          </Link>
+          <div className="flex items-center gap-3">
+            {email && <span className="hidden text-sm text-navy-600 sm:inline">{email}</span>}
+            {onSignOut && (
+              <Button variant="outline" onClick={onSignOut} className="px-4 py-2 text-sm">
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Sign out
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">{children}</main>
+    </div>
+  );
+}
+
+function Notice({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl border border-navy-100 bg-white p-8 text-center shadow-xl shadow-navy-900/5">
+      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-500">
+        <ShieldAlert className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <h2 className="text-xl font-extrabold text-navy-900">{title}</h2>
+      <div className="text-sm leading-relaxed text-navy-700">{children}</div>
+    </div>
+  );
+}
+
+function SectionContent({ section, onMessagesChanged }: { section: AdminSection; onMessagesChanged: () => void }) {
+  if (section === 'bulk-requests') return <BulkRequestList />;
+  if (section === 'orders') return <IndividualOrderList />;
+  if (section === 'customers') return <CustomerList />;
+  if (section === 'services') return <ServiceOverview />;
+  if (section === 'pricing') return <PriceManager />;
+  if (section === 'partners') return <DeliveryPartnerManager />;
+  if (section === 'institutions') return <InstitutionManager />;
+  if (section === 'messages') return <EnquiryInbox onChanged={onMessagesChanged} />;
+  return <HostelManager />;
+}
+
+interface AdminPageProps {
+  section: AdminSection;
+}
+
+export default function AdminPage({ section }: AdminPageProps) {
+  const session = useAdminSession();
+  const unanswered = useUnansweredCount(session.status === 'admin');
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch {
+      window.alert('Could not sign out. Please try again.');
+    }
+  };
+
+  if (session.status === 'unconfigured') {
+    return (
+      <AdminShell>
+        <Notice title="Database not connected">
+          <p>
+            The admin dashboard needs the website&apos;s database connection before it can load requests. Until it
+            is connected, no bulk requests can be viewed or saved here.
+          </p>
+        </Notice>
+      </AdminShell>
+    );
+  }
+
+  if (session.status === 'loading') {
+    return (
+      <AdminShell>
+        <p className="text-center text-sm text-navy-700">Checking access...</p>
+      </AdminShell>
+    );
+  }
+
+  if (session.status === 'signed-out') {
+    return (
+      <AdminShell>
+        <AdminSignIn />
+      </AdminShell>
+    );
+  }
+
+  if (session.status === 'error') {
+    return (
+      <AdminShell>
+        <Notice title="Access could not be checked">
+          <p>Something went wrong while checking admin access. Refresh the page to try again.</p>
+        </Notice>
+      </AdminShell>
+    );
+  }
+
+  if (session.status === 'forbidden') {
+    return (
+      <AdminShell email={session.email} onSignOut={handleSignOut}>
+        <Notice title="No admin access">
+          <p>
+            This account is signed in but is not on the admin list. Ask the site owner to add your user ID to the
+            admin list.
+          </p>
+        </Notice>
+      </AdminShell>
+    );
+  }
+
+  return (
+    <AdminShell email={session.email} onSignOut={handleSignOut}>
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-red-500">Admin dashboard</p>
+          <h1 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">Campus operations</h1>
+        </div>
+
+        <Link
+          to="/admin/messages"
+          className="flex items-center justify-between gap-4 rounded-3xl border border-navy-100 bg-white p-5 shadow-sm transition hover:border-red-200 sm:p-6"
+        >
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-navy-500">Unanswered messages</span>
+            <span className="text-sm text-navy-700">Website enquiries waiting for a reply</span>
+          </div>
+          <span className="text-3xl font-extrabold text-red-500">{unanswered.count ?? '-'}</span>
+        </Link>
+
+        <nav aria-label="Admin sections" className="flex gap-2 overflow-x-auto border-b border-navy-100">
+          {SECTIONS.map((item) => {
+            const active = item.value === section;
+            return (
+              <Link
+                key={item.value}
+                to={`/admin/${item.value}`}
+                aria-current={active ? 'page' : undefined}
+                className={`-mb-px whitespace-nowrap border-b-2 px-4 py-3 text-sm font-bold transition ${
+                  active ? 'border-red-500 text-navy-900' : 'border-transparent text-navy-600 hover:text-navy-900'
+                }`}
+              >
+                {item.label}
+                {item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && (
+                  <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                    {unanswered.count}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <SectionContent section={section} onMessagesChanged={unanswered.reload} />
+      </div>
+    </AdminShell>
+  );
+}
