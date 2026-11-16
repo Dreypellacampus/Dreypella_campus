@@ -18,17 +18,10 @@ import { useUnansweredCount } from '@/hooks/useUnansweredCount';
 import { signOut } from '@/lib/auth';
 
 export type AdminSection =
-  | 'bulk-requests'
-  | 'orders'
-  | 'customers'
-  | 'services'
-  | 'pricing'
-  | 'locations'
-  | 'partners'
-  | 'messages'
-  | 'institutions';
+  | 'bulk-requests' | 'orders' | 'customers' | 'services' | 'pricing'
+  | 'locations' | 'partners' | 'messages' | 'institutions';
 
-const SECTIONS: { value: AdminSection; label: string }[] = [
+const MAIN_SECTIONS: { value: AdminSection; label: string }[] = [
   { value: 'bulk-requests', label: 'Bulk requests' },
   { value: 'orders', label: 'Individual orders' },
   { value: 'customers', label: 'Customers' },
@@ -39,23 +32,21 @@ const SECTIONS: { value: AdminSection; label: string }[] = [
   { value: 'institutions', label: 'Institutions' },
   { value: 'messages', label: 'Messages' },
 ];
+const INSTITUTION_SECTIONS: { value: AdminSection; label: string }[] = [
+  { value: 'bulk-requests', label: 'Bulk requests' },
+  { value: 'orders', label: 'Individual orders' },
+  { value: 'customers', label: 'Customers' },
+];
 
 function AdminShell({ children, email, onSignOut }: { children: ReactNode; email?: string; onSignOut?: () => void }) {
   return (
     <div className="min-h-screen bg-mist">
       <header className="border-b border-navy-100 bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link to="/" aria-label="Back to the website">
-            <Logo />
-          </Link>
+          <Link to="/" aria-label="Back to the website"><Logo /></Link>
           <div className="flex items-center gap-3">
             {email && <span className="hidden text-sm text-navy-600 sm:inline">{email}</span>}
-            {onSignOut && (
-              <Button variant="outline" onClick={onSignOut} className="px-4 py-2 text-sm">
-                <LogOut className="h-4 w-4" aria-hidden="true" />
-                Sign out
-              </Button>
-            )}
+            {onSignOut && <Button variant="outline" onClick={onSignOut} className="px-4 py-2 text-sm"><LogOut className="h-4 w-4" aria-hidden="true" />Sign out</Button>}
           </div>
         </div>
       </header>
@@ -65,15 +56,7 @@ function AdminShell({ children, email, onSignOut }: { children: ReactNode; email
 }
 
 function Notice({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl border border-navy-100 bg-white p-8 text-center shadow-xl shadow-navy-900/5">
-      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-500">
-        <ShieldAlert className="h-5 w-5" aria-hidden="true" />
-      </span>
-      <h2 className="text-xl font-extrabold text-navy-900">{title}</h2>
-      <div className="text-sm leading-relaxed text-navy-700">{children}</div>
-    </div>
-  );
+  return <div className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl border border-navy-100 bg-white p-8 text-center shadow-xl shadow-navy-900/5"><span className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-500"><ShieldAlert className="h-5 w-5" aria-hidden="true" /></span><h2 className="text-xl font-extrabold text-navy-900">{title}</h2><div className="text-sm leading-relaxed text-navy-700">{children}</div></div>;
 }
 
 function SectionContent({ section, onMessagesChanged }: { section: AdminSection; onMessagesChanged: () => void }) {
@@ -88,115 +71,44 @@ function SectionContent({ section, onMessagesChanged }: { section: AdminSection;
   return <HostelManager />;
 }
 
-interface AdminPageProps {
-  section: AdminSection;
-}
-
-export default function AdminPage({ section }: AdminPageProps) {
+export default function AdminPage({ section }: { section: AdminSection }) {
   const session = useAdminSession();
-  const unanswered = useUnansweredCount(session.status === 'admin');
+  const isMainAdmin = session.status === 'admin';
+  const unanswered = useUnansweredCount(isMainAdmin);
+
   const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch {
-      window.alert('Could not sign out. Please try again.');
-    }
+    try { await signOut(); } catch { window.alert('Could not sign out. Please try again.'); }
   };
 
-  if (session.status === 'unconfigured') {
-    return (
-      <AdminShell>
-        <Notice title="Database not connected">
-          <p>
-            The admin dashboard needs the website&apos;s database connection before it can load requests. Until it
-            is connected, no bulk requests can be viewed or saved here.
-          </p>
-        </Notice>
-      </AdminShell>
-    );
-  }
+  if (session.status === 'unconfigured') return <AdminShell><Notice title="Database not connected"><p>The admin dashboard needs the website database connection before it can load requests.</p></Notice></AdminShell>;
+  if (session.status === 'loading') return <AdminShell><p className="text-center text-sm text-navy-700">Checking access...</p></AdminShell>;
+  if (session.status === 'signed-out') return <AdminShell><AdminSignIn /></AdminShell>;
+  if (session.status === 'error') return <AdminShell><Notice title="Access could not be checked"><p>Something went wrong while checking admin access. Refresh the page to try again.</p></Notice></AdminShell>;
+  if (session.status === 'forbidden') return <AdminShell email={session.email} onSignOut={handleSignOut}><Notice title="No admin access"><p>This account is not assigned an administrative role. Ask the main administrator for access.</p></Notice></AdminShell>;
 
-  if (session.status === 'loading') {
-    return (
-      <AdminShell>
-        <p className="text-center text-sm text-navy-700">Checking access...</p>
-      </AdminShell>
-    );
-  }
-
-  if (session.status === 'signed-out') {
-    return (
-      <AdminShell>
-        <AdminSignIn />
-      </AdminShell>
-    );
-  }
-
-  if (session.status === 'error') {
-    return (
-      <AdminShell>
-        <Notice title="Access could not be checked">
-          <p>Something went wrong while checking admin access. Refresh the page to try again.</p>
-        </Notice>
-      </AdminShell>
-    );
-  }
-
-  if (session.status === 'forbidden') {
-    return (
-      <AdminShell email={session.email} onSignOut={handleSignOut}>
-        <Notice title="No admin access">
-          <p>
-            This account is signed in but is not on the admin list. Ask the site owner to add your user ID to the
-            admin list.
-          </p>
-        </Notice>
-      </AdminShell>
-    );
+  const isInstitutionAdmin = session.status === 'institution-admin';
+  const sections = isInstitutionAdmin ? INSTITUTION_SECTIONS : MAIN_SECTIONS;
+  if (!sections.some((item) => item.value === section)) {
+    return <AdminShell email={session.email} onSignOut={handleSignOut}><Notice title="Restricted section"><p>Your administrator account can only access operations for its assigned institution.</p><Link to="/admin/orders" className="font-bold text-red-600 hover:underline">Open institution orders</Link></Notice></AdminShell>;
   }
 
   return (
     <AdminShell email={session.email} onSignOut={handleSignOut}>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-red-500">Admin dashboard</p>
-          <h1 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">Campus operations</h1>
+          <p className="text-xs font-bold uppercase tracking-wider text-red-500">{isInstitutionAdmin ? 'Institution administrator' : 'Main administrator'}</p>
+          <h1 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">{isInstitutionAdmin ? session.institutionName : 'Campus operations'}</h1>
+          {isInstitutionAdmin && <p className="text-sm text-navy-600">You are viewing operations for your assigned institution only.</p>}
         </div>
-
-        <Link
-          to="/admin/messages"
-          className="flex items-center justify-between gap-4 rounded-3xl border border-navy-100 bg-white p-5 shadow-sm transition hover:border-red-200 sm:p-6"
-        >
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-navy-500">Unanswered messages</span>
-            <span className="text-sm text-navy-700">Website enquiries waiting for a reply</span>
-          </div>
-          <span className="text-3xl font-extrabold text-red-500">{unanswered.count ?? '-'}</span>
-        </Link>
-
+        {isMainAdmin && (
+          <Link to="/admin/messages" className="flex items-center justify-between gap-4 rounded-3xl border border-navy-100 bg-white p-5 shadow-sm transition hover:border-red-200 sm:p-6">
+            <div className="flex flex-col gap-1"><span className="text-xs font-bold uppercase tracking-wider text-navy-500">Unanswered messages</span><span className="text-sm text-navy-700">Website enquiries waiting for a reply</span></div>
+            <span className="text-3xl font-extrabold text-red-500">{unanswered.count ?? '-'}</span>
+          </Link>
+        )}
         <nav aria-label="Admin sections" className="flex gap-2 overflow-x-auto border-b border-navy-100">
-          {SECTIONS.map((item) => {
-            const active = item.value === section;
-            return (
-              <Link
-                key={item.value}
-                to={`/admin/${item.value}`}
-                aria-current={active ? 'page' : undefined}
-                className={`-mb-px whitespace-nowrap border-b-2 px-4 py-3 text-sm font-bold transition ${
-                  active ? 'border-red-500 text-navy-900' : 'border-transparent text-navy-600 hover:text-navy-900'
-                }`}
-              >
-                {item.label}
-                {item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && (
-                  <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
-                    {unanswered.count}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+          {sections.map((item) => <Link key={item.value} to={`/admin/${item.value}`} aria-current={item.value === section ? 'page' : undefined} className={`-mb-px whitespace-nowrap border-b-2 px-4 py-3 text-sm font-bold transition ${item.value === section ? 'border-red-500 text-navy-900' : 'border-transparent text-navy-600 hover:text-navy-900'}`}>{item.label}{item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">{unanswered.count}</span>}</Link>)}
         </nav>
-
         <SectionContent section={section} onMessagesChanged={unanswered.reload} />
       </div>
     </AdminShell>
