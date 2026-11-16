@@ -56,6 +56,8 @@ export interface BulkOrderRow extends BulkOrderRecord {
   customer_response: string | null;
   created_at: string;
   updated_at: string;
+  institution_id?: string | null;
+  institution_name_snapshot?: string | null;
 }
 
 export interface BulkItemDraft {
