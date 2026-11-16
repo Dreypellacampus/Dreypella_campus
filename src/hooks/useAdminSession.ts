@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { isAdminUser } from '@/lib/adminAuth';
+import { getInstitutionAdminAssignment, isAdminUser } from '@/lib/adminAuth';
 
 export type AdminSessionState =
   | { status: 'unconfigured' }
@@ -9,6 +9,7 @@ export type AdminSessionState =
   | { status: 'signed-out' }
   | { status: 'forbidden'; email: string }
   | { status: 'admin'; email: string }
+  | { status: 'institution-admin'; email: string; institutionId: string; institutionName: string }
   | { status: 'error' };
 
 export function useAdminSession(): AdminSessionState {
@@ -21,7 +22,6 @@ export function useAdminSession(): AdminSessionState {
     if (!client) return;
 
     let active = true;
-
     const resolve = async (session: Session | null) => {
       if (!session) {
         if (active) setState({ status: 'signed-out' });
@@ -32,17 +32,39 @@ export function useAdminSession(): AdminSessionState {
       if (active) setState({ status: 'loading' });
 
       try {
-        const admin = await isAdminUser(session.user.id);
-        if (active) setState(admin ? { status: 'admin', email } : { status: 'forbidden', email });
+        if (await isAdminUser(session.user.id)) {
+          if (active) setState({ status: 'admin', email });
+          return;
+        }
+
+        const assignment = await getInstitutionAdminAssignment(session.user.id);
+        if (!assignment) {
+          if (active) setState({ status: 'forbidden', email });
+          return;
+        }
+
+        const { data, error } = await client
+          .from('institutions')
+          .select('name')
+          .eq('id', assignment.institution_id)
+          .maybeSingle();
+        if (error || !data) throw new Error('Assigned institution could not be loaded.');
+
+        if (active) {
+          setState({
+            status: 'institution-admin',
+            email,
+            institutionId: assignment.institution_id,
+            institutionName: data.name,
+          });
+        }
       } catch {
         if (active) setState({ status: 'error' });
       }
     };
 
     const { data } = client.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        await resolve(session);
-      })();
+      void resolve(session);
     });
 
     return () => {
