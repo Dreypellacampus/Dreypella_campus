@@ -4,6 +4,8 @@ import { PageShell } from '@/components/account/SignedOutPrompt';
 import Button, { buttonStyles } from '@/components/ui/Button';
 import { useCustomerSession } from '@/hooks/useCustomerSession';
 import { formatDeliveryLines } from '@/lib/deliveryLocation';
+import { formatDisplayDate } from '@/lib/format';
+import { fetchCustomerBulkOrders, type CustomerBulkOrder } from '@/lib/customerBulkOrderRepository';
 import { formatOrderDate, orderDetailLines } from '@/lib/individualOrderDisplay';
 import { fetchIndividualOrders, type IndividualOrderRow } from '@/lib/individualOrderRepository';
 import { fetchQuotations, type Quotation } from '@/lib/quotationRepository';
@@ -13,7 +15,7 @@ import QuotationPanel from '@/components/orders/QuotationPanel';
 
 type LoadState =
   | { status: 'loading' }
-  | { status: 'ready'; orders: IndividualOrderRow[]; quotationsByOrder: Record<string, Quotation> }
+  | { status: 'ready'; orders: IndividualOrderRow[]; bulkOrders: CustomerBulkOrder[]; quotationsByOrder: Record<string, Quotation> }
   | { status: 'error'; message: string };
 
 export default function MyOrdersPage() {
@@ -29,10 +31,10 @@ export default function MyOrdersPage() {
 
     (async () => {
       try {
-        const [orders, quotations] = await Promise.all([fetchIndividualOrders(), fetchQuotations()]);
+        const [orders, bulkOrders, quotations] = await Promise.all([fetchIndividualOrders(), fetchCustomerBulkOrders(), fetchQuotations()]);
         if (active) {
           const quotationsByOrder = Object.fromEntries(quotations.map((quotation) => [quotation.order_id, quotation]));
-          setLoad({ status: 'ready', orders, quotationsByOrder });
+          setLoad({ status: 'ready', orders, bulkOrders, quotationsByOrder });
         }
       } catch (caught) {
         if (active) {
@@ -62,9 +64,9 @@ export default function MyOrdersPage() {
             <History className="h-6 w-6" aria-hidden="true" />
           </span>
           <p className="text-xs font-bold uppercase tracking-wider text-red-500">My orders</p>
-          <h1 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">Your individual orders</h1>
+          <h1 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">Your orders and bulk requests</h1>
           <p className="text-sm leading-relaxed text-navy-700">
-            Bulk requests are not shown here yet. Keep the reference number you were given for any bulk request.
+            Track the progress of your individual orders and bulk requests from one place.
           </p>
         </div>
 
@@ -76,7 +78,7 @@ export default function MyOrdersPage() {
           </p>
         )}
 
-        {load.status === 'ready' && load.orders.length === 0 && (
+        {load.status === 'ready' && load.orders.length === 0 && load.bulkOrders.length === 0 && (
           <div className="flex flex-col items-start gap-4 rounded-3xl border border-dashed border-navy-200 bg-white p-6 sm:p-8">
             <p className="text-base font-bold text-navy-900">You have not placed an order yet.</p>
             <Button onClick={() => navigate('/order')} className="px-6 py-3 text-sm">
@@ -152,6 +154,57 @@ export default function MyOrdersPage() {
               </li>
             ))}
           </ul>
+        )}
+
+
+        {load.status === 'ready' && load.bulkOrders.length > 0 && (
+          <section className="flex flex-col gap-4" aria-labelledby="bulk-order-history">
+            <div className="flex flex-col gap-1">
+              <h2 id="bulk-order-history" className="text-xl font-extrabold text-navy-900">Bulk requests</h2>
+              <p className="text-sm text-navy-700">Your organisation and bulk purchase requests.</p>
+            </div>
+            <ul className="flex flex-col gap-4">
+              {load.bulkOrders.map((order) => (
+                <li key={order.id} className="flex flex-col gap-4 rounded-3xl border border-navy-100 bg-white p-5 shadow-sm sm:p-6">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-bold uppercase tracking-wider text-navy-500">{formatOrderDate(order.created_at)}</span>
+                      <h3 className="text-lg font-extrabold text-navy-900">{order.service_type}</h3>
+                      <span className="text-sm font-semibold tracking-wide text-navy-700">{order.reference}</span>
+                      {order.institution_name_snapshot && <span className="text-xs font-semibold text-navy-600">{order.institution_name_snapshot}</span>}
+                    </div>
+                    <span className="rounded-full bg-navy-50 px-3 py-1 text-xs font-bold text-navy-900">{order.status}</span>
+                  </div>
+                  <div className="grid gap-4 text-sm leading-relaxed text-navy-800 sm:grid-cols-2">
+                    <div>
+                      <p className="font-bold text-navy-900">Requested items</p>
+                      <ul className="mt-1 flex flex-col gap-1">
+                        {order.items.map((item, index) => (
+                          <li key={`${order.id}-${index}`}>{item.name} — Qty: {item.quantity}{item.specs ? ` (${item.specs})` : ''}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="font-bold text-navy-900">Requested delivery</p>
+                      <p>{formatDisplayDate(order.delivery_date)} · {order.delivery_time}</p>
+                      <ul className="mt-1 flex flex-col gap-1">
+                        {formatDeliveryLines(order.delivery_location).map((line) => <li key={line}>{line}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                  <a
+                    href={buildWhatsAppUrl(`Hello Dreypella Campus, I have a question about my bulk request ${order.reference}.`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-navy-900 underline-offset-4 hover:underline"
+                  >
+                    <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                    Message us about this request
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <a href={WHATSAPP_CHAT_URL} target="_blank" rel="noopener noreferrer" className={buttonStyles('outline', 'w-full sm:w-auto')}>
