@@ -20,7 +20,7 @@ export default function Footer() {
           <Logo tone="light" />
           <p className="text-base font-semibold text-white">Your Campus. Your Needs. Delivered.</p>
           <p className="max-w-xs text-sm leading-relaxed text-navy-200">
-            Shopping, printing, collection errands and delivery for LAUTECH students in Ogbomoso.
+            Shopping, printing, collection errands and delivery for students, with an expanding reach across institutions and locations.
           </p>
         </div>
 
@@ -44,7 +44,6 @@ export default function Footer() {
           <p className="text-sm font-bold uppercase tracking-wider text-white">Reach us</p>
           <p className="text-sm">WhatsApp: {WHATSAPP_DISPLAY_NUMBER}</p>
           <p className="text-sm">Email: dreypellaride@gmail.com</p>
-          <p className="text-sm">Opposite Dr. Oyewo House under G, Ogbomoso</p>
           <p className="mt-4 inline-flex w-fit items-center rounded-full border border-white/15 px-3 py-1 text-xs font-semibold text-white">
             Powered by Dreypella
           </p>
