@@ -18,6 +18,8 @@ export interface IndividualOrderRow extends IndividualOrderRecord {
   cancellation_reason: string | null;
   admin_notes: string | null;
   created_at: string;
+  institution_id?: string | null;
+  institution_name_snapshot?: string | null;
 }
 
 export async function saveIndividualOrder(record: IndividualOrderRecord): Promise<void> {
@@ -33,7 +35,7 @@ export async function fetchIndividualOrders(): Promise<IndividualOrderRow[]> {
   const { data, error } = await getSupabase()
     .from('individual_orders')
     .select(
-      'id, reference, service_id, service_title, customer_name, whatsapp, details, delivery_location, status, cancellation_reason, created_at, individual_order_notes(notes)',
+      'id, reference, service_id, service_title, customer_name, whatsapp, details, delivery_location, status, cancellation_reason, created_at, institution_id, institution_name_snapshot, individual_order_notes(notes)',
     )
     .order('created_at', { ascending: false });
 
