@@ -88,6 +88,7 @@ export default function BulkRequestList() {
                   </span>
                 </div>
                 <p className="text-base font-bold text-navy-900">{order.customer_name}</p>
+                {order.institution_name_snapshot && <p className="text-xs font-semibold text-navy-600">{order.institution_name_snapshot}</p>}
                 <p className="text-sm text-navy-700">
                   {order.service_type} | {order.items.length} line{order.items.length === 1 ? '' : 's'},{' '}
                   {quantity} units | Due {formatDisplayDate(order.delivery_date)}
