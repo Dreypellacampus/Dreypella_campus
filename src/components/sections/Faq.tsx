@@ -15,7 +15,7 @@ const FAQS = [
   {
     question: 'Where do you deliver?',
     answer:
-      'We deliver to student hostels and approved locations around the LAUTECH campus in Ogbomoso. Tell us your exact spot and we will confirm it is covered.',
+      'Dreypella Campus is expanding across institutions and locations. Share your institution and delivery point with us so we can confirm whether your request can currently be served before accepting the order.',
   },
   {
     question: 'How do I send my document for printing?',
