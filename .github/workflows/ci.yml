@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Apply compatible dependency security fixes
-        run: npm audit fix
+        run: npm update && npm audit fix
       - name: Verify dependency security
         run: npm audit --audit-level=low
       - name: Commit updated lockfile on development branch
