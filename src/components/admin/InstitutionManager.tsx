@@ -12,6 +12,7 @@ import {
 import { fetchCustomerProfiles } from '@/lib/customerProfileRepository';
 import type { CustomerProfile } from '@/lib/customerProfile';
 import { formatDisplayDate } from '@/lib/format';
+import InstitutionAdminManager from '@/components/admin/InstitutionAdminManager';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
@@ -358,6 +359,8 @@ export default function InstitutionManager() {
                 <p className="text-2xl font-extrabold text-navy-900">{detailInstitution.customer_count}</p>
               </div>
             </div>
+
+            <InstitutionAdminManager institutionId={detailInstitution.id} />
 
             <div className="flex flex-col gap-3">
               <h3 className="text-sm font-extrabold uppercase tracking-wider text-red-500">Customers</h3>
