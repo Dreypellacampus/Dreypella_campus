@@ -1,6 +1,7 @@
 import { normalizePhone } from '@/lib/phone';
 
 export interface CustomerProfile {
+  id?: string;
   full_name: string;
   whatsapp: string;
   preferred_address: string | null;
