@@ -93,8 +93,6 @@ export default function IndividualOrderList() {
                 {order.service_title} | Placed {formatOrderDate(order.created_at)}
               </p>
               {order.institution_name_snapshot && <p className="text-xs font-semibold text-navy-600">{order.institution_name_snapshot}</p>}
-              <p className="text-sm text-navy-700">
-              </p>
             </button>
           </li>
         ))}
