@@ -25,7 +25,7 @@ export default function Hero({ onOrder }: HeroProps) {
         <div className="animate-fade-up">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white">
             <MapPin className="h-4 w-4 text-red-400" aria-hidden="true" />
-            Built for LAUTECH students in Ogbomoso
+            Expanding across participating institutions
           </span>
 
           <h1 className="mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
@@ -37,9 +37,9 @@ export default function Hero({ onOrder }: HeroProps) {
           </p>
 
           <p className="mt-6 max-w-xl text-base leading-relaxed text-navy-100 sm:text-lg">
-            Dreypella Campus is a student convenience and delivery service powered by Dreypella. We
-            shop, print, run collection errands and deliver for you, so you are never stuck on the
-            move.
+            Dreypella Campus is a student convenience and delivery platform powered by Dreypella.
+            We help students arrange shopping, printing, collection errands and delivery, with a
+            platform designed to grow across institutions and locations.
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -85,7 +85,7 @@ export default function Hero({ onOrder }: HeroProps) {
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-red-500">Powered by</p>
               <p className="text-base font-extrabold text-navy-900">Dreypella</p>
-              <p className="text-sm text-navy-700">Campus delivery to hostels and approved spots</p>
+              <p className="text-sm text-navy-700">Campus delivery at participating locations</p>
             </div>
           </div>
         </div>
