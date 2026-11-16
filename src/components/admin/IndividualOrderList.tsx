@@ -5,10 +5,13 @@ import { STATUS_STYLES } from '@/components/admin/statusStyles';
 import { BULK_STATUSES, type BulkStatus } from '@/lib/bulkOrder';
 import { fetchIndividualOrders, type IndividualOrderRow } from '@/lib/individualOrderRepository';
 import { formatOrderDate } from '@/lib/individualOrderDisplay';
+import { useAdminSession } from '@/hooks/useAdminSession';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
 export default function IndividualOrderList() {
+  const session = useAdminSession();
+  const institutionAdmin = session.status === 'institution-admin';
   const [orders, setOrders] = useState<IndividualOrderRow[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [filter, setFilter] = useState<BulkStatus | 'All'>('All');
@@ -89,6 +92,9 @@ export default function IndividualOrderList() {
               <p className="text-sm text-navy-700">
                 {order.service_title} | Placed {formatOrderDate(order.created_at)}
               </p>
+              {order.institution_name_snapshot && <p className="text-xs font-semibold text-navy-600">{order.institution_name_snapshot}</p>}
+              <p className="text-sm text-navy-700">
+              </p>
             </button>
           </li>
         ))}
@@ -100,6 +106,7 @@ export default function IndividualOrderList() {
           order={selected}
           onClose={() => setSelectedId(null)}
           onSaved={load}
+          allowDeliveryAssignment={!institutionAdmin}
         />
       )}
     </div>
