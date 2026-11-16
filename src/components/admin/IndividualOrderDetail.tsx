@@ -15,12 +15,13 @@ interface IndividualOrderDetailProps {
   order: IndividualOrderRow;
   onClose: () => void;
   onSaved: () => void;
+  allowDeliveryAssignment?: boolean;
 }
 
 const FIELD_CLASS =
   'w-full rounded-2xl border border-navy-200 bg-white px-4 py-3 text-sm text-navy-900 focus:border-navy-500 focus:outline-none focus:ring-4 focus:ring-navy-100';
 
-export default function IndividualOrderDetail({ order, onClose, onSaved }: IndividualOrderDetailProps) {
+export default function IndividualOrderDetail({ order, onClose, onSaved, allowDeliveryAssignment = true }: IndividualOrderDetailProps) {
   const [status, setStatus] = useState<BulkStatus>(order.status);
   const [cancellationReason, setCancellationReason] = useState(order.cancellation_reason ?? '');
   const [notes, setNotes] = useState(order.admin_notes ?? '');
@@ -63,7 +64,7 @@ export default function IndividualOrderDetail({ order, onClose, onSaved }: Indiv
 
   return (
     <Dialog
-      eyebrow={order.customer_name}
+      eyebrow={[order.customer_name, order.institution_name_snapshot].filter(Boolean).join(' · ')}
       title={order.reference}
       onClose={onClose}
       footer={
@@ -190,9 +191,7 @@ export default function IndividualOrderDetail({ order, onClose, onSaved }: Indiv
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <div className="mt-4">
-            <DeliveryAssignmentPanel orderId={order.id} />
-          </div>
+          {allowDeliveryAssignment && <div className="mt-4"><DeliveryAssignmentPanel orderId={order.id} /></div>}
         </section>
       </div>
     </Dialog>
