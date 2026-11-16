@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Building2, Pencil, Plus, Search, Users, X } from 'lucide-react';
+import { Building2, Pencil, Plus, Search, Users } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
 import {
