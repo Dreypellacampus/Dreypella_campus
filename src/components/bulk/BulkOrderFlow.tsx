@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, MessageCircle } from 'lucide-react';
 import BulkItemsStep from '@/components/bulk/BulkItemsStep';
 import BulkReviewStep from '@/components/bulk/BulkReviewStep';
@@ -9,6 +9,8 @@ import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
 import { BULK_DELIVERY_FIELDS, BULK_DETAILS_FIELDS } from '@/data/bulkFields';
 import { usePriceCatalog } from '@/hooks/usePriceCatalog';
+import { useCustomerSession } from '@/hooks/useCustomerSession';
+import { fetchCustomerProfile } from '@/lib/customerProfileRepository';
 import {
   buildBulkOrderMessage,
   buildBulkPayload,
@@ -48,6 +50,7 @@ interface BulkOrderFlowProps {
 }
 
 export default function BulkOrderFlow({ onBack, onClose }: BulkOrderFlowProps) {
+  const session = useCustomerSession();
   const [step, setStep] = useState<BulkStep>('contact');
   const [reference] = useState(generateBulkReference);
   const [values, setValues] = useState<Record<string, string>>({});
@@ -57,6 +60,30 @@ export default function BulkOrderFlow({ onBack, onClose }: BulkOrderFlowProps) {
   const [sent, setSent] = useState<SentRequest | null>(null);
   const { state: priceState, reload: reloadPrices } = usePriceCatalog();
   const readyPrices = priceState.status === 'ready' ? priceState.prices : null;
+
+  useEffect(() => {
+    if (!session.userId) return;
+    let active = true;
+
+    fetchCustomerProfile(session.userId)
+      .then((profile) => {
+        if (!active || !profile) return;
+        setValues((current) => ({
+          ...current,
+          customerName: current.customerName || profile.full_name || '',
+          contactName: current.contactName || profile.full_name || '',
+          whatsapp: current.whatsapp || profile.whatsapp || '',
+          organization: current.organization || profile.institution || profile.department || '',
+        }));
+      })
+      .catch(() => {
+        // Profile prefill is optional; the customer can still enter the details manually.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session.userId]);
 
   const isSent = step === 'sent';
   const stepIndex = isSent ? FLOW.length : FLOW.indexOf(step);
