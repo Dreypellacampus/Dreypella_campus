@@ -50,6 +50,7 @@ export default function AuthForm({ initialMode, onDone }: AuthFormProps) {
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [pendingProfile, setPendingProfile] = useState(false);
 
   const fields = mode === 'signup' ? SIGN_UP_FIELDS : mode === 'forgot' ? FORGOT_FIELDS : SIGN_IN_FIELDS;
   const copy = MODE_COPY[mode];
@@ -95,6 +96,15 @@ export default function AuthForm({ initialMode, onDone }: AuthFormProps) {
     try {
       if (mode === 'signin') {
         await signInWithPassword(email, values.password);
+        if (pendingProfile) {
+          try {
+            await saveCustomerProfile((await import('@/lib/supabase')).getSupabase().auth.getUser ? (await (await import('@/lib/supabase')).getSupabase().auth.getUser()).data.user?.id ?? '' : '', valuesToProfile(values));
+            setPendingProfile(false);
+          } catch {
+            setFormError('You are signed in, but your registration details could not be saved. Open My profile and complete the required fields.');
+            return;
+          }
+        }
         onDone();
         return;
       }
@@ -107,7 +117,8 @@ export default function AuthForm({ initialMode, onDone }: AuthFormProps) {
 
       const { userId, needsConfirmation } = await signUpWithPassword(email, values.password);
       if (needsConfirmation || !userId) {
-        setNotice('Account created. Confirm your email address, then sign in to complete your profile.');
+        setNotice('Account created. Confirm your email address, then sign in to save your registration details.');
+        setPendingProfile(true);
         setMode('signin');
         setErrors({});
         return;
