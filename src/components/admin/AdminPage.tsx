@@ -94,26 +94,34 @@ export default function AdminPage({ section }: { section: AdminSection }) {
 
   return (
     <AdminShell email={session.email} onSignOut={handleSignOut}>
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-red-500">{isInstitutionAdmin ? 'Institution administrator' : 'Main administrator'}</p>
-          <h1 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">{isInstitutionAdmin ? session.institutionName : 'Campus operations'}</h1>
-          {isInstitutionAdmin && <p className="text-sm text-navy-600">You are viewing operations for your assigned institution only.</p>}
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
+        <aside className="min-w-0 self-start rounded-2xl border border-navy-100 bg-white p-3 shadow-sm lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto">
+          <div className="mb-3 px-3 pt-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-navy-500">Administration</p>
+            <p className="mt-1 text-sm font-semibold text-navy-900">Dashboard menu</p>
+          </div>
+          <nav aria-label="Admin side menu" className="flex max-h-64 flex-col gap-1 overflow-y-auto overscroll-contain pr-1 lg:max-h-none">
+            {sections.map((item) => {
+              const Icon = item.icon;
+              const active = item.value === section;
+              return <Link key={item.value} to={`/admin/${item.value}`} aria-current={active ? 'page' : undefined} className={`flex w-full shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition ${active ? 'bg-navy-900 text-white shadow-sm' : 'text-navy-700 hover:bg-navy-50 hover:text-navy-900'}`}><Icon className="h-4 w-4 shrink-0" aria-hidden="true" /><span className="min-w-0 flex-1">{item.label}</span>{item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${active ? 'bg-white text-red-600' : 'bg-red-500 text-white'}`}>{unanswered.count}</span>}</Link>;
+            })}
+          </nav>
+        </aside>
+        <div className="flex min-w-0 flex-col gap-8">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-red-500">{isInstitutionAdmin ? 'Institution administrator' : 'Main administrator'}</p>
+            <h1 className="text-2xl font-extrabold text-navy-900 sm:text-3xl">{isInstitutionAdmin ? session.institutionName : 'Campus operations'}</h1>
+            {isInstitutionAdmin && <p className="text-sm text-navy-600">You are viewing operations for your assigned institution only.</p>}
+          </div>
+          {isMainAdmin && (
+            <Link to="/admin/messages" className="flex items-center justify-between gap-4 rounded-3xl border border-navy-100 bg-white p-5 shadow-sm transition hover:border-red-200 sm:p-6">
+              <div className="flex flex-col gap-1"><span className="text-xs font-bold uppercase tracking-wider text-navy-500">Unanswered messages</span><span className="text-sm text-navy-700">Website enquiries waiting for a reply</span></div>
+              <span className="text-3xl font-extrabold text-red-500">{unanswered.count ?? '-'}</span>
+            </Link>
+          )}
+          <SectionContent section={section} onMessagesChanged={unanswered.reload} />
         </div>
-        {isMainAdmin && (
-          <Link to="/admin/messages" className="flex items-center justify-between gap-4 rounded-3xl border border-navy-100 bg-white p-5 shadow-sm transition hover:border-red-200 sm:p-6">
-            <div className="flex flex-col gap-1"><span className="text-xs font-bold uppercase tracking-wider text-navy-500">Unanswered messages</span><span className="text-sm text-navy-700">Website enquiries waiting for a reply</span></div>
-            <span className="text-3xl font-extrabold text-red-500">{unanswered.count ?? '-'}</span>
-          </Link>
-        )}
-        <nav aria-label="Admin menu" tabIndex={0} className="flex max-w-full items-center gap-1 overflow-x-auto overscroll-x-contain rounded-xl border border-navy-100 bg-white p-2 shadow-sm whitespace-nowrap">
-          {sections.map((item) => {
-            const Icon = item.icon;
-            const active = item.value === section;
-            return <Link key={item.value} to={`/admin/${item.value}`} aria-current={active ? 'page' : undefined} className={`inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${active ? 'bg-navy-900 text-white shadow-sm' : 'text-navy-700 hover:bg-navy-50 hover:text-navy-900'}`}><Icon className="h-4 w-4" aria-hidden="true" /><span>{item.label}</span>{item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${active ? 'bg-white text-red-600' : 'bg-red-500 text-white'}`}>{unanswered.count}</span>}</Link>;
-          })}
-        </nav>
-        <SectionContent section={section} onMessagesChanged={unanswered.reload} />
       </div>
     </AdminShell>
   );
