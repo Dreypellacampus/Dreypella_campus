@@ -3,7 +3,7 @@ import { getSupabase } from '@/lib/supabase';
 export interface OrderPayment {
   id: string;
   order_id: string;
-  method: 'bank_transfer' | 'cash';
+  method: 'bank_transfer';
   status: 'awaiting_confirmation' | 'confirmed' | 'rejected';
   amount_kobo: number;
   currency: 'NGN';
@@ -37,11 +37,11 @@ export async function saveCampusPaymentSettings(values: Omit<CampusPaymentSettin
   if (error) throw new Error(error.message || 'Payment instructions could not be saved.');
 }
 export async function submitManualOrderPayment(input: {
-  orderId: string; method: 'bank_transfer' | 'cash'; senderName?: string; senderBank?: string;
+  orderId: string; method?: 'bank_transfer'; senderName?: string; senderBank?: string;
   transferReference?: string; customerNote?: string;
 }): Promise<string> {
   const { data, error } = await getSupabase().rpc('submit_manual_order_payment', {
-    p_order_id: input.orderId, p_method: input.method,
+    p_order_id: input.orderId, p_method: 'bank_transfer',
     p_sender_name: input.senderName ?? null, p_sender_bank: input.senderBank ?? null,
     p_transfer_reference: input.transferReference ?? null, p_customer_note: input.customerNote ?? null,
   });
