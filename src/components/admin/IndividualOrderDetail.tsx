@@ -10,6 +10,7 @@ import DeliveryAssignmentPanel from '@/components/admin/DeliveryAssignmentPanel'
 import QuotationEditor from '@/components/admin/QuotationEditor';
 import ReferenceImageLink from '@/components/admin/ReferenceImageLink';
 import OrderStatusHistory from '@/components/admin/OrderStatusHistory';
+import AdminOrderPayments from '@/components/admin/AdminOrderPayments';
 
 interface IndividualOrderDetailProps {
   order: IndividualOrderRow;
@@ -121,6 +122,8 @@ export default function IndividualOrderDetail({ order, onClose, onSaved, allowDe
           <h3 className="text-sm font-extrabold uppercase tracking-wider text-red-500">Status history</h3>
           <OrderStatusHistory orderId={order.id} refreshKey={`${order.status}|${order.cancellation_reason ?? ''}`} />
         </section>
+
+        <AdminOrderPayments orderId={order.id} />
 
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-extrabold uppercase tracking-wider text-red-500">Quotation</h3>
