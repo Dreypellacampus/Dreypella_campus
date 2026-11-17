@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { LogOut, ShieldAlert } from 'lucide-react';
+import { Building2, ClipboardList, FileText, LogOut, MapPinned, MessageSquare, Package, ShieldAlert, Tags, Truck, Users } from 'lucide-react';
 import AdminSignIn from '@/components/admin/AdminSignIn';
 import BulkRequestList from '@/components/admin/BulkRequestList';
 import CustomerList from '@/components/admin/CustomerList';
@@ -21,22 +21,22 @@ export type AdminSection =
   | 'bulk-requests' | 'orders' | 'customers' | 'services' | 'pricing'
   | 'locations' | 'partners' | 'messages' | 'institutions';
 
-const MAIN_SECTIONS: { value: AdminSection; label: string }[] = [
-  { value: 'bulk-requests', label: 'Bulk requests' },
-  { value: 'orders', label: 'Individual orders' },
-  { value: 'customers', label: 'Customers' },
-  { value: 'services', label: 'Services' },
-  { value: 'pricing', label: 'Prices' },
-  { value: 'locations', label: 'Hostels' },
-  { value: 'partners', label: 'Delivery partners' },
-  { value: 'institutions', label: 'Institutions' },
-  { value: 'messages', label: 'Messages' },
-];
-const INSTITUTION_SECTIONS: { value: AdminSection; label: string }[] = [
-  { value: 'bulk-requests', label: 'Bulk requests' },
-  { value: 'orders', label: 'Individual orders' },
-  { value: 'customers', label: 'Customers' },
-];
+const MAIN_SECTIONS = [
+  { value: 'bulk-requests', label: 'Bulk requests', icon: Package },
+  { value: 'orders', label: 'Individual orders', icon: ClipboardList },
+  { value: 'customers', label: 'Customers', icon: Users },
+  { value: 'services', label: 'Services', icon: FileText },
+  { value: 'pricing', label: 'Prices', icon: Tags },
+  { value: 'locations', label: 'Hostels', icon: MapPinned },
+  { value: 'partners', label: 'Delivery partners', icon: Truck },
+  { value: 'institutions', label: 'Institutions', icon: Building2 },
+  { value: 'messages', label: 'Messages', icon: MessageSquare },
+] satisfies { value: AdminSection; label: string; icon: typeof Package }[];
+const INSTITUTION_SECTIONS = [
+  { value: 'bulk-requests', label: 'Bulk requests', icon: Package },
+  { value: 'orders', label: 'Individual orders', icon: ClipboardList },
+  { value: 'customers', label: 'Customers', icon: Users },
+] satisfies { value: AdminSection; label: string; icon: typeof Package }[];
 
 function AdminShell({ children, email, onSignOut }: { children: ReactNode; email?: string; onSignOut?: () => void }) {
   return (
@@ -106,8 +106,12 @@ export default function AdminPage({ section }: { section: AdminSection }) {
             <span className="text-3xl font-extrabold text-red-500">{unanswered.count ?? '-'}</span>
           </Link>
         )}
-        <nav aria-label="Admin sections" tabIndex={0} className="flex max-w-full gap-1 overflow-x-auto overscroll-x-contain border-b border-navy-100 whitespace-nowrap">
-          {sections.map((item) => <Link key={item.value} to={`/admin/${item.value}`} aria-current={item.value === section ? 'page' : undefined} className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-bold transition ${item.value === section ? 'border-red-500 text-navy-900' : 'border-transparent text-navy-600 hover:text-navy-900'}`}>{item.label}{item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">{unanswered.count}</span>}</Link>)}
+        <nav aria-label="Admin menu" tabIndex={0} className="flex max-w-full items-center gap-1 overflow-x-auto overscroll-x-contain rounded-xl border border-navy-100 bg-white p-2 shadow-sm whitespace-nowrap">
+          {sections.map((item) => {
+            const Icon = item.icon;
+            const active = item.value === section;
+            return <Link key={item.value} to={`/admin/${item.value}`} aria-current={active ? 'page' : undefined} className={`inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${active ? 'bg-navy-900 text-white shadow-sm' : 'text-navy-700 hover:bg-navy-50 hover:text-navy-900'}`}><Icon className="h-4 w-4" aria-hidden="true" /><span>{item.label}</span>{item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${active ? 'bg-white text-red-600' : 'bg-red-500 text-white'}`}>{unanswered.count}</span>}</Link>;
+          })}
         </nav>
         <SectionContent section={section} onMessagesChanged={unanswered.reload} />
       </div>
