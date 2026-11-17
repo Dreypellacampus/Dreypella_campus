@@ -40,3 +40,8 @@ export async function fetchOrderPayments(orderId: string): Promise<OrderPayment[
   if (error) throw new Error('Payment status could not be loaded.');
   return (data ?? []) as OrderPayment[];
 }
+
+export async function confirmCashPayment(paymentId: string): Promise<void> {
+  const { error } = await getSupabase().rpc('admin_confirm_cash_order_payment', { p_payment_id: paymentId });
+  if (error) throw new Error(error.message || 'Cash payment could not be confirmed.');
+}
