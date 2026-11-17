@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, MessageCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Dialog from '@/components/ui/Dialog';
@@ -18,6 +18,7 @@ import {
 } from '@/lib/deliveryLocation';
 import { EMPTY_BUY_ITEM, serializeBuyItems, type BuyItem } from '@/lib/buyItems';
 import { toLocalWhatsapp } from '@/lib/customerProfile';
+import { fetchCustomerProfile } from '@/lib/customerProfileRepository';
 import { saveIndividualOrder, type IndividualOrderRecord } from '@/lib/individualOrderRepository';
 import { uploadReferenceImage, validateReferenceImage } from '@/lib/referenceImage';
 import { buildOrderUrl, validateContact, validateService } from '@/lib/order';
@@ -58,6 +59,28 @@ export default function IndividualOrderFlow({ initialService, onBack, onClose }:
   const [errors, setErrors] = useState<FieldErrors>({});
   const [reference, setReference] = useState(() => generateReference('IND'));
   const [sent, setSent] = useState<SentState | null>(null);
+
+  useEffect(() => {
+    if (!session.userId) return;
+    let active = true;
+
+    fetchCustomerProfile(session.userId)
+      .then((profile) => {
+        if (!active || !profile) return;
+        setValues((current) => ({
+          ...current,
+          fullName: current.fullName || profile.full_name || '',
+          whatsapp: current.whatsapp || profile.whatsapp || '',
+        }));
+      })
+      .catch(() => {
+        // Profile prefill is optional; customers can still enter their details manually.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session.userId]);
 
   const stepIndex = step === 'sent' ? FLOW.length : FLOW.indexOf(step);
   const service = serviceId ? SERVICES[serviceId] : null;
