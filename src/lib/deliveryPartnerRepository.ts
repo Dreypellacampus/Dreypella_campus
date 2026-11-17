@@ -179,7 +179,7 @@ export async function fetchPartnerFinancials(): Promise<PartnerFinancialRow[]> {
     .select('id, full_name, whatsapp, bank_name, bank_account_name, bank_account_number, active, delivery_partner_collections(id, amount_collected_kobo, remitted_amount_kobo, collection_method, collection_reference, created_at)')
     .order('full_name', { ascending: true });
   if (error) throw new Error('Partner financial records could not be loaded.');
-  return (data ?? []) as PartnerFinancialRow[];
+  return (data ?? []).map((row) => ({ ...row, collections: row.delivery_partner_collections ?? [] })) as unknown as PartnerFinancialRow[];
 }
 
 export async function savePartnerBankDetails(
