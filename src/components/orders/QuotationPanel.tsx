@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, HelpCircle, XCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import OrderPaymentPanel from '@/components/orders/OrderPaymentPanel';
 import { formatNaira } from '@/lib/format';
 import { respondToQuotation, type Quotation } from '@/lib/quotationRepository';
 
@@ -100,6 +101,7 @@ export default function QuotationPanel({ quotation, onResponded }: QuotationPane
         <p className="text-sm font-semibold text-emerald-800">You approved this quotation.</p>
       )}
       {quotation.status === 'Declined' && <p className="text-sm font-semibold text-navy-800">You declined this quotation.</p>}
+      {quotation.status === 'Approved' && <OrderPaymentPanel orderId={quotation.order_id} />}
 
       {error && (
         <p role="alert" className="text-sm font-semibold text-red-600">
