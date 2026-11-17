@@ -4,7 +4,7 @@ import FieldsStep from '@/components/order/FieldsStep';
 import InstitutionPicker from '@/components/account/InstitutionPicker';
 import Button from '@/components/ui/Button';
 import { PageShell } from '@/components/account/SignedOutPrompt';
-import { BASE_PROFILE_FIELDS, CUSTOMER_CATEGORY_OPTIONS, LEVEL_OF_STUDY_FIELD, INSTITUTION_SUBMISSION_FIELD } from '@/data/accountFields';
+import { AREA_FIELD, BASE_PROFILE_FIELDS, CUSTOMER_CATEGORY_OPTIONS, LEVEL_OF_STUDY_FIELD, INSTITUTION_SUBMISSION_FIELD } from '@/data/accountFields';
 import { useCustomerSession } from '@/hooks/useCustomerSession';
 import { profileToValues, valuesToProfile } from '@/lib/customerProfile';
 import { fetchCustomerProfile, saveCustomerProfile } from '@/lib/customerProfileRepository';
@@ -70,7 +70,10 @@ export default function ProfilePage() {
     setSaveError(null);
     setSaved(false);
 
-    const found = validateFields(BASE_PROFILE_FIELDS, values);
+    const found = validateFields([...BASE_PROFILE_FIELDS, AREA_FIELD], values);
+    if (STUDENT_CATEGORIES.includes(values.customerCategory ?? '') && !values.institutionId) {
+      found.institutionId = 'Please select your institution.';
+    }
     if (!values.customerCategory) {
       found.customerCategory = 'Please select your customer type.';
     }
@@ -114,7 +117,7 @@ export default function ProfilePage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
             <FieldsStep
               intro="These details fill in your orders and let us reach you on WhatsApp. Keep them up to date."
-              fields={BASE_PROFILE_FIELDS}
+              fields={[...BASE_PROFILE_FIELDS, AREA_FIELD]}
               values={values}
               errors={errors}
               onChange={handleChange}
@@ -148,6 +151,8 @@ export default function ProfilePage() {
                   value={values.institutionId ?? ''}
                   nameValue={values.institution ?? ''}
                   onChange={handleInstitutionChange}
+                  required
+                  error={errors.institutionId}
                 />
                 <div className="flex flex-col gap-2">
                   <label htmlFor="levelOfStudy" className="text-sm font-bold text-navy-900">
