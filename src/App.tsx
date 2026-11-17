@@ -38,6 +38,7 @@ const ADMIN_PAGES: Record<string, AdminSection> = {
   '/admin/locations': 'locations',
   '/admin/partners': 'partners',
   '/admin/partner-finances': 'partner-finances',
+  '/admin/finance-accounting': 'finance-accounting',
   '/admin/institutions': 'institutions',
   '/admin/payment-settings': 'payment-settings',
   '/admin/messages': 'messages',
