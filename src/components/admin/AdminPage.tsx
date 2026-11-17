@@ -9,6 +9,7 @@ import HostelManager from '@/components/admin/HostelManager';
 import IndividualOrderList from '@/components/admin/IndividualOrderList';
 import InstitutionManager from '@/components/admin/InstitutionManager';
 import PriceManager from '@/components/admin/PriceManager';
+import PaymentSettingsPage from '@/components/admin/PaymentSettingsPage';
 import ServiceOverview from '@/components/admin/ServiceOverview';
 import Button from '@/components/ui/Button';
 import Logo from '@/components/ui/Logo';
@@ -19,7 +20,7 @@ import { signOut } from '@/lib/auth';
 
 export type AdminSection =
   | 'bulk-requests' | 'orders' | 'customers' | 'services' | 'pricing'
-  | 'locations' | 'partners' | 'messages' | 'institutions';
+  | 'locations' | 'partners' | 'messages' | 'institutions' | 'payment-settings';
 
 const MAIN_SECTIONS = [
   { value: 'bulk-requests', label: 'Bulk requests', icon: Package },
@@ -30,6 +31,7 @@ const MAIN_SECTIONS = [
   { value: 'locations', label: 'Hostels', icon: MapPinned },
   { value: 'partners', label: 'Delivery partners', icon: Truck },
   { value: 'institutions', label: 'Institutions', icon: Building2 },
+  { value: 'payment-settings', label: 'Payment settings', icon: FileText },
   { value: 'messages', label: 'Messages', icon: MessageSquare },
 ] satisfies { value: AdminSection; label: string; icon: typeof Package }[];
 const INSTITUTION_SECTIONS = [
@@ -67,6 +69,7 @@ function SectionContent({ section, onMessagesChanged }: { section: AdminSection;
   if (section === 'pricing') return <PriceManager />;
   if (section === 'partners') return <DeliveryPartnerManager />;
   if (section === 'institutions') return <InstitutionManager />;
+  if (section === 'payment-settings') return <PaymentSettingsPage />;
   if (section === 'messages') return <EnquiryInbox onChanged={onMessagesChanged} />;
   return <HostelManager />;
 }
