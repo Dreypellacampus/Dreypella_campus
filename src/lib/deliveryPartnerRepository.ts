@@ -150,3 +150,69 @@ export async function removeOrderAssignment(orderId: string): Promise<void> {
 
   if (error || !data || data.length === 0) throw new Error('The delivery assignment could not be removed.');
 }
+
+
+export interface PartnerFinancialRow {
+  id: string;
+  full_name: string;
+  whatsapp: string;
+  bank_name: string;
+  bank_account_name: string;
+  bank_account_number: string;
+  active: boolean;
+  collections: {
+    id: string;
+    amount_collected_kobo: number;
+    remitted_amount_kobo: number;
+    collection_method: string;
+    collection_reference: string | null;
+    created_at: string;
+  }[];
+}
+
+export async function fetchPartnerFinancials(): Promise<PartnerFinancialRow[]> {
+  const { data, error } = await getSupabase()
+    .from('delivery_partners')
+    .select('id, full_name, whatsapp, bank_name, bank_account_name, bank_account_number, active, delivery_partner_collections(id, amount_collected_kobo, remitted_amount_kobo, collection_method, collection_reference, created_at)')
+    .order('full_name', { ascending: true });
+  if (error) throw new Error('Partner financial records could not be loaded.');
+  return (data ?? []) as PartnerFinancialRow[];
+}
+
+export async function savePartnerBankDetails(
+  partnerId: string,
+  details: { bank_name: string; bank_account_name: string; bank_account_number: string },
+): Promise<void> {
+  const { data, error } = await getSupabase()
+    .from('delivery_partners')
+    .update(details)
+    .eq('id', partnerId)
+    .select('id');
+  if (error || !data?.length) throw new Error('Partner bank details could not be saved.');
+}
+
+export async function recordPartnerCollection(
+  orderId: string,
+  amountNaira: number,
+  method: 'bank_transfer' | 'cash_collected',
+  reference?: string,
+): Promise<void> {
+  const { error } = await getSupabase().rpc('admin_record_partner_collection', {
+    p_order_id: orderId, p_amount_kobo: Math.round(amountNaira * 100),
+    p_method: method, p_reference: reference ?? null,
+  });
+  if (error) throw new Error(error.message || 'Collection could not be recorded.');
+}
+
+export async function recordPartnerRemittance(
+  collectionId: string,
+  amountNaira: number,
+  reference?: string,
+  note?: string,
+): Promise<void> {
+  const { error } = await getSupabase().rpc('admin_record_partner_remittance', {
+    p_collection_id: collectionId, p_amount_kobo: Math.round(amountNaira * 100),
+    p_reference: reference ?? null, p_note: note ?? null,
+  });
+  if (error) throw new Error(error.message || 'Remittance could not be recorded.');
+}
