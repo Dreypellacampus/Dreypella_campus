@@ -77,6 +77,12 @@ export default function AuthForm({ initialMode, onDone }: AuthFormProps) {
     setNotice(null);
 
     const found = validateFields(fields, values);
+    if (mode === 'signup' && !values.area?.trim()) {
+      found.area = 'Please enter your area or neighbourhood.';
+    }
+    if (mode === 'signup' && isStudentCategory(values.customerCategory ?? '') && !values.institutionId) {
+      found.institutionId = 'Please select your institution.';
+    }
     if (mode === 'signup' && !values.customerCategory) {
       found.customerCategory = 'Please select your customer type.';
     }
@@ -164,6 +170,8 @@ export default function AuthForm({ initialMode, onDone }: AuthFormProps) {
                   value={values.institutionId ?? ''}
                   nameValue={values.institution ?? ''}
                   onChange={handleInstitutionChange}
+                  required
+                  error={errors.institutionId}
                 />
                 <div className="flex flex-col gap-2">
                   <label htmlFor="levelOfStudy" className="text-sm font-bold text-navy-900">
