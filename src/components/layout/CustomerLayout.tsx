@@ -241,6 +241,15 @@ export default function CustomerLayout({ pathname, children }: CustomerLayoutPro
             <span className="hidden max-w-[16rem] truncate text-sm font-semibold text-navy-800 sm:block">
               {session.email}
             </span>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="inline-flex items-center gap-1.5 rounded-full border border-navy-200 px-3 py-2 text-xs font-bold text-navy-900 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 lg:hidden"
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              {signingOut ? 'Signing out' : 'Log out'}
+            </button>
           </div>
         </header>
 
