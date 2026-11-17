@@ -6,7 +6,7 @@ import { fetchCampusPaymentSettings, fetchOrderPayments, submitManualOrderPaymen
 export default function OrderPaymentPanel({ orderId }: { orderId: string }) {
   const [settings, setSettings] = useState<CampusPaymentSettings | null>(null);
   const [payments, setPayments] = useState<OrderPayment[]>([]);
-  const [method, setMethod] = useState<'bank_transfer' | 'cash'>('bank_transfer');
+  
   const [senderName, setSenderName] = useState('');
   const [senderBank, setSenderBank] = useState('');
   const [transferReference, setTransferReference] = useState('');
@@ -26,14 +26,14 @@ export default function OrderPaymentPanel({ orderId }: { orderId: string }) {
   useEffect(() => { void load(); }, [load]);
 
   const submit = async () => {
-    if (method === 'bank_transfer' && (!senderName.trim() || !transferReference.trim())) {
+    if (!senderName.trim() || !transferReference.trim()) {
       setMessage('Enter the sender name and bank transfer reference.');
       return;
     }
     setBusy(true); setMessage(null);
     try {
       await submitManualOrderPayment({
-        orderId, method, senderName, senderBank, transferReference, customerNote: note,
+        orderId, method: 'bank_transfer', senderName, senderBank, transferReference, customerNote: note,
       });
       setMessage('Your payment details have been submitted. Your order will remain awaiting confirmation until an authorised Dreypella Campus administrator verifies receipt.');
       setSenderName(''); setSenderBank(''); setTransferReference(''); setNote('');
