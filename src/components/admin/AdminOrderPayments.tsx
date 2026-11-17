@@ -32,7 +32,7 @@ export default function AdminOrderPayments({ orderId }: { orderId: string }) {
       {payments.map((payment) => (
         <div key={payment.id} className="flex flex-col gap-3 rounded-xl bg-mist p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-bold text-navy-900">{payment.method === 'bank_transfer' ? 'Bank transfer' : 'Cash'} · {formatNaira(payment.amount_kobo / 100)}</p>
+            <p className="font-bold text-navy-900">Bank transfer · {formatNaira(payment.amount_kobo / 100)}</p>
             <span className="text-xs font-bold uppercase text-navy-700">{payment.status.replace('_', ' ')}</span>
           </div>
           <dl className="grid grid-cols-1 gap-2 text-xs text-navy-700 sm:grid-cols-2">
@@ -48,7 +48,7 @@ export default function AdminOrderPayments({ orderId }: { orderId: string }) {
               <label className="flex flex-col gap-1 text-xs font-semibold text-navy-800">Review note
                 <textarea value={notes[payment.id] ?? ''} onChange={(event) => setNotes((current) => ({ ...current, [payment.id]: event.target.value }))} maxLength={500} rows={2} className="rounded-xl border border-navy-200 bg-white px-3 py-2" />
               </label>
-              <p className="text-xs font-semibold text-amber-800">Verify the funds in the receiving account or confirm cash physically before approving.</p>
+              <p className="text-xs font-semibold text-amber-800">Verify that the transfer has cleared in the receiving bank account before approving.</p>
               <div className="flex flex-wrap gap-2">
                 <Button onClick={() => void review(payment.id, 'confirmed')} disabled={busyId !== null} className="px-4 py-2 text-xs">{busyId === payment.id ? 'Saving...' : 'Confirm received'}</Button>
                 <Button onClick={() => void review(payment.id, 'rejected')} disabled={busyId !== null} variant="outline" className="px-4 py-2 text-xs">Reject submission</Button>
