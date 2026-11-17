@@ -28,7 +28,7 @@ export const LOCATION_TYPE_OPTIONS: { value: LocationType; label: string; descri
   {
     value: 'on-campus',
     label: 'On-campus hostel',
-    description: 'A hostel within the institution's campus.',
+    description: 'A hostel within the institution campus.',
   },
   {
     value: 'off-campus',
