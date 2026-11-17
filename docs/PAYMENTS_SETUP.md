@@ -6,16 +6,16 @@ Dreypella Campus uses manual payment and administrator confirmation. No payment 
 
 1. The customer submits an order and receives a quotation.
 2. After approving the quotation, the customer sees the official bank details configured by the main administrator.
-3. The customer transfers the exact quoted amount or chooses the cash option.
+3. The customer transfers the exact quoted amount .
 4. For a bank transfer, the customer submits the sender name, sender bank (optional), transfer reference/narration and any note.
 5. The payment is marked `awaiting_confirmation`. A submitted transfer reference is not proof that funds have arrived.
-6. The customer waits while an authorised administrator checks the receiving bank account or confirms cash physically.
+6. The customer waits while an authorised administrator checks the receiving bank account or confirms .
 
 ## Administrator process
 
 - Main administrators configure bank name, account name, account number and customer instructions at `/admin/payment-settings`.
 - Main administrators and the assigned institution administrator can review payment submissions on the individual order detail screen.
-- The administrator must independently verify cleared funds in the receiving account or physically receive cash.
+- The administrator must independently verify cleared funds in the receiving account or physically receive bank transfer.
 - The administrator selects **Confirm received** or **Reject submission**, optionally adding a note.
 - Only an authorised administrator can change a submission to `confirmed` or `rejected`.
 - Customers can see the resulting status and administrator note.
