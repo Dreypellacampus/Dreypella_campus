@@ -60,7 +60,16 @@ export const INSTITUTION_SUBMISSION_FIELD: ServiceField = {
   placeholder: 'We will review and add it if appropriate',
 };
 
-export const AREA_FIELD: ServiceField = {\n  name: 'area',\n  label: 'Area / neighbourhood',\n  type: 'text',\n  required: true,\n  placeholder: 'e.g. Under G, Stadium area, Oke-Ado',\n  helper: 'Tell us the area where you usually need deliveries.',\n};\n\nexport const BASE_PROFILE_FIELDS: ServiceField[] = [
+export const AREA_FIELD: ServiceField = {
+  name: 'area',
+  label: 'Area / neighbourhood',
+  type: 'text',
+  required: true,
+  placeholder: 'e.g. Under G, Stadium area, Oke-Ado',
+  helper: 'Tell us the area where you usually need deliveries.',
+};
+
+export const BASE_PROFILE_FIELDS: ServiceField[] = [
   {
     name: 'fullName',
     label: 'Full name',
