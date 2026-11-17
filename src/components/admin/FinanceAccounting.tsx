@@ -10,7 +10,7 @@ interface FinanceEntry {
   amount_kobo: number; transaction_date: string; institution_id: string | null;
   partner_id: string | null; reference: string | null; created_at: string;
 }
-interface Assignment { partner_id: string; fee: number }
+interface Assignment { partner_id: string; fee: number; delivered_at: string | null }
 const FIELD = 'w-full rounded-xl border border-navy-200 bg-white px-3 py-2.5 text-sm text-navy-900';
 const naira = (kobo: number) => formatNaira(Number(kobo || 0) / 100);
 
@@ -41,7 +41,7 @@ export default function FinanceAccounting() {
         db.from('campus_finance_entries').select('id,entry_type,category,description,amount_kobo,transaction_date,institution_id,partner_id,reference,created_at').order('transaction_date', { ascending: false }).order('created_at', { ascending: false }),
         db.from('institutions').select('id,name').order('name'),
         db.from('delivery_partners').select('id,full_name').order('full_name'),
-        db.from('delivery_assignments').select('partner_id,fee'),
+        db.from('delivery_assignments').select('partner_id,fee,delivered_at'),
       ]);
       if (ledger.error) throw ledger.error;
       if (institutionRows.error) throw institutionRows.error;
@@ -62,7 +62,7 @@ export default function FinanceAccounting() {
   const income = filtered.filter(e => e.entry_type === 'income').reduce((s,e) => s + Number(e.amount_kobo), 0);
   const expenses = filtered.filter(e => e.entry_type === 'expense').reduce((s,e) => s + Number(e.amount_kobo), 0);
   const partnerRows = partners.map(p => {
-    const earnedNaira = assignments.filter(a => a.partner_id === p.id).reduce((s,a) => s + Number(a.fee || 0), 0);
+    const earnedNaira = assignments.filter(a => a.partner_id === p.id && a.delivered_at !== null).reduce((s,a) => s + Number(a.fee || 0), 0);
     const paidKobo = entries.filter(e => e.category === 'partner_payout' && e.partner_id === p.id).reduce((s,e) => s + Number(e.amount_kobo), 0);
     return { ...p, earnedNaira, paidKobo, dueKobo: Math.max(0, earnedNaira * 100 - paidKobo) };
   });
@@ -128,7 +128,7 @@ export default function FinanceAccounting() {
     {notice && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p>}
     <div className="rounded-2xl border border-navy-100 bg-white p-5">
       <h3 className="font-extrabold text-navy-900">Delivery partner earnings &amp; payouts</h3>
-      <p className="mt-1 text-xs text-navy-600">Earnings are calculated from assigned delivery fees (whole naira). Payouts are the expense entries recorded above; balances are indicative and require review before payment.</p>
+      <p className="mt-1 text-xs text-navy-600">Earnings are calculated from completed deliveries only, using the assigned delivery fee (whole naira). Payouts are the expense entries recorded above; balances are indicative and require review before payment.</p>
       <div className="mt-3 overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b text-xs text-navy-500"><th className="py-2 pr-3">Partner</th><th className="pr-3">Assigned earnings</th><th className="pr-3">Payouts recorded</th><th>Indicative due</th></tr></thead><tbody>{partnerRows.map(p => <tr key={p.id} className="border-b border-navy-50"><td className="py-2 pr-3 font-semibold">{p.full_name}</td><td className="pr-3">{formatNaira(p.earnedNaira)}</td><td className="pr-3">{naira(p.paidKobo)}</td><td>{naira(p.dueKobo)}</td></tr>)}</tbody></table></div>
     </div>
     <div className="rounded-2xl border border-navy-100 bg-white p-5">
