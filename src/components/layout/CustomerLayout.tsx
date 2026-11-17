@@ -61,7 +61,7 @@ function NavList({
     ...(isAdmin ? [ADMIN_NAV_ITEM] : []),
   ];
   return (
-    <nav aria-label="Customer menu" className="flex flex-col gap-1">
+    <nav aria-label="Customer menu" className="flex min-h-0 flex-col gap-1 overflow-y-auto overscroll-contain pr-1">
       {items.map((item) => {
         const Icon = item.icon;
         const active = pathname === item.to;
@@ -71,7 +71,7 @@ function NavList({
             to={item.to}
             onClick={onNavigate}
             aria-current={active ? 'page' : undefined}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+            className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
               active ? 'bg-white text-navy-900 shadow-sm' : 'text-white/85 hover:bg-white/10 hover:text-white'
             }`}
           >
@@ -172,7 +172,7 @@ export default function CustomerLayout({ pathname, children }: CustomerLayoutPro
 
   return (
     <div className="min-h-screen bg-mist lg:flex">
-      <aside className="hidden w-72 shrink-0 flex-col justify-between bg-navy-900 p-6 lg:sticky lg:top-0 lg:flex lg:h-screen">
+      <aside className="hidden h-screen w-72 shrink-0 flex-col justify-between overflow-hidden bg-navy-900 p-4 lg:sticky lg:top-0 lg:flex">
         <div className="flex flex-col gap-8">
           <Link to="/" className="flex items-center gap-3 text-white">
             <Logo tone="light" />
@@ -190,7 +190,7 @@ export default function CustomerLayout({ pathname, children }: CustomerLayoutPro
             onClick={() => setDrawerOpen(false)}
             className="absolute inset-0 bg-navy-900/60"
           />
-          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col justify-between bg-navy-900 p-6 shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 flex max-h-dvh w-72 max-w-[85vw] flex-col justify-between overflow-hidden bg-navy-900 p-4 shadow-2xl">
             <div className="flex flex-col gap-8">
               <div className="flex items-center justify-between">
                 <Logo tone="light" />
