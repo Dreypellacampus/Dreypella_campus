@@ -1,3 +1,4 @@
+# Development-only Pages deployment. A push to this branch rebuilds the preview.
 name: Deploy development branch to GitHub Pages
 
 on:
