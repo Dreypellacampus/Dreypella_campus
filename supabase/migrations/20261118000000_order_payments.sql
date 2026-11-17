@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS public.order_payments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id uuid NOT NULL REFERENCES public.individual_orders(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  method text NOT NULL CHECK (method IN ('bank_transfer', 'cash')),
+  method text NOT NULL CHECK (method = 'bank_transfer'),
   status text NOT NULL DEFAULT 'awaiting_confirmation'
     CHECK (status IN ('awaiting_confirmation', 'confirmed', 'rejected')),
   amount_kobo bigint NOT NULL CHECK (amount_kobo > 0),
