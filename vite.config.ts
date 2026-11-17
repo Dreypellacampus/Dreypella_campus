@@ -4,6 +4,8 @@ import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // GitHub Pages project-site path for this repository.
+  base: '/Dreypella_campus/',
   plugins: [react()],
   resolve: {
     alias: {
