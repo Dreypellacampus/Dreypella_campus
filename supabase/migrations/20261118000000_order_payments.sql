@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS public.campus_payment_settings (
 INSERT INTO public.campus_payment_settings (id) VALUES (true) ON CONFLICT (id) DO NOTHING;
 ALTER TABLE public.campus_payment_settings ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.campus_payment_settings TO authenticated;
+GRANT UPDATE (bank_name, account_name, account_number, payment_instructions, updated_at, updated_by) ON public.campus_payment_settings TO authenticated;
 DROP POLICY IF EXISTS customers_read_campus_payment_settings ON public.campus_payment_settings;
 CREATE POLICY customers_read_campus_payment_settings ON public.campus_payment_settings
 FOR SELECT TO authenticated USING (true);
@@ -82,6 +83,10 @@ BEGIN
   IF coalesce(trim(p_sender_name), '') = '' OR coalesce(trim(p_transfer_reference), '') = '' THEN
     RAISE EXCEPTION 'Enter the sender name and bank transfer reference.';
   END IF;
+  IF EXISTS (SELECT 1 FROM public.order_payments op WHERE op.order_id = p_order_id AND op.status = 'awaiting_confirmation') THEN
+    RAISE EXCEPTION 'A payment submission is already awaiting confirmation for this order.';
+  END IF;
+
   SELECT q.amount INTO v_amount
   FROM public.quotations q
   JOIN public.individual_orders o ON o.id = q.order_id
@@ -135,3 +140,44 @@ END;
 $$;
 REVOKE EXECUTE ON FUNCTION public.review_manual_order_payment(uuid,text,text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.review_manual_order_payment(uuid,text,text) TO authenticated;
+
+
+CREATE OR REPLACE FUNCTION public.notify_manual_payment_review()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order_reference text;
+  v_title text;
+  v_message text;
+BEGIN
+  IF NEW.status = OLD.status OR NEW.status NOT IN ('confirmed', 'rejected') THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT reference INTO v_order_reference
+  FROM public.individual_orders
+  WHERE id = NEW.order_id;
+
+  IF NEW.status = 'confirmed' THEN
+    v_title := 'Payment confirmed';
+    v_message := 'Your bank transfer for order ' || coalesce(v_order_reference, '') || ' has been confirmed.';
+  ELSE
+    v_title := 'Payment needs attention';
+    v_message := 'Your bank transfer for order ' || coalesce(v_order_reference, '') || ' was not confirmed. Please review the administrator note or contact Dreypella Campus.';
+  END IF;
+
+  INSERT INTO public.notifications (user_id, order_id, title, message)
+  VALUES (NEW.user_id, NEW.order_id, v_title, left(v_message, 500));
+
+  RETURN NEW;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.notify_manual_payment_review() FROM PUBLIC, anon, authenticated;
+DROP TRIGGER IF EXISTS trg_notify_manual_payment_review ON public.order_payments;
+CREATE TRIGGER trg_notify_manual_payment_review
+AFTER UPDATE OF status ON public.order_payments
+FOR EACH ROW EXECUTE FUNCTION public.notify_manual_payment_review();
