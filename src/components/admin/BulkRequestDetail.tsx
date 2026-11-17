@@ -114,6 +114,7 @@ export default function BulkRequestDetail({ order, onClose, onSaved }: BulkReque
             <Detail label="Customer / organization" value={order.customer_name} />
             <Detail label="Contact person" value={order.contact_name} />
             <Detail label="WhatsApp" value={order.whatsapp} />
+            {order.institution_name_snapshot && <Detail label="Institution" value={order.institution_name_snapshot} />}
             {order.organization && <Detail label="Department / hostel" value={order.organization} />}
             <Detail label="Service type" value={order.service_type} />
             <Detail label="Budget" value={order.budget ?? 'Not given'} />
