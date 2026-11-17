@@ -1,36 +1,38 @@
-# Dreypella Campus payment activation
+# Dreypella Campus manual payment process
 
-The development branch now contains a Paystack checkout flow for approved individual-order quotations and a cash-on-delivery selection flow.
+Dreypella Campus uses manual payment and administrator confirmation. No payment gateway is integrated.
 
-## Required before real payments can be accepted
+## Customer process
 
-1. Apply the Supabase migrations in timestamp order, including:
-   - `20261118000000_order_payments.sql`
-   - `20261118010000_admin_cash_payment_confirmation.sql`
-2. Deploy the Edge Functions:
-   - `order-payments`
-   - `paystack-webhook`
-3. Configure Supabase Edge Function secrets:
-   - `PAYSTACK_SECRET_KEY`: Paystack test secret key for development; use the live secret only after production approval.
-   - `SITE_URL`: exact customer-facing site origin, e.g. the development Pages origin for development.
-   - Supabase provides `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` to deployed functions.
-4. In the Paystack dashboard, register the deployed `paystack-webhook` function URL as the webhook URL.
-5. Complete a test transaction and confirm:
-   - the browser return verifies the reference, amount and NGN currency;
-   - the signed webhook independently confirms the same reference and amount;
-   - duplicate webhook delivery does not duplicate or reverse a payment;
-   - a cash selection stays `awaiting_cash` until an authorised administrator confirms receipt.
+1. The customer submits an order and receives a quotation.
+2. After approving the quotation, the customer sees the official bank details configured by the main administrator.
+3. The customer transfers the exact quoted amount or chooses the cash option.
+4. For a bank transfer, the customer submits the sender name, sender bank (optional), transfer reference/narration and any note.
+5. The payment is marked `awaiting_confirmation`. A submitted transfer reference is not proof that funds have arrived.
+6. The customer waits while an authorised administrator checks the receiving bank account or confirms cash physically.
 
-## Current payment rules
+## Administrator process
 
-- Payment can only be started for an order belonging to the signed-in customer.
-- The customer must approve a quotation first.
-- Amount is read from the saved quotation on the server; the browser cannot choose the payable amount.
-- Paystack secret credentials remain server-side.
-- Cash is recorded as `awaiting_cash`; it is not shown as paid until an authorised main or assigned institution administrator confirms receipt.
-- Payment records are readable by the owning customer, main administrators and the assigned institution administrator for that order.
-- Guest orders cannot use online checkout until linked to a signed-in customer account.
+- Main administrators configure bank name, account name, account number and customer instructions at `/admin/payment-settings`.
+- Main administrators and the assigned institution administrator can review payment submissions on the individual order detail screen.
+- The administrator must independently verify cleared funds in the receiving account or physically receive cash.
+- The administrator selects **Confirm received** or **Reject submission**, optionally adding a note.
+- Only an authorised administrator can change a submission to `confirmed` or `rejected`.
+- Customers can see the resulting status and administrator note.
 
-## Not yet activated
+## Database and security
 
-No migration has been applied to the Supabase project and no Edge Function has been deployed by this code change. Do not accept live payments until the deployment, secret configuration, webhook registration and end-to-end test are complete. Use Paystack test mode first.
+The migration `20261118000000_order_payments.sql` creates the manual payment records and payment-settings table. It also adds two restricted database functions:
+- `submit_manual_order_payment`: creates a payment submission for the signed-in owner of an order using the approved quotation amount from the database.
+- `review_manual_order_payment`: allows only a main administrator or the active institution administrator assigned to that order to confirm or reject a pending submission.
+
+Customers can read only their own payment records. Payment settings are readable by signed-in customers; only main administrators can update the account details.
+
+## Activation checklist
+
+1. Review and approve the migration before applying it to the development Supabase project.
+2. Apply the migration to development, then test customer submission, institution-admin review, main-admin review, and customer status visibility using test accounts.
+3. Enter the official bank details in `/admin/payment-settings`.
+4. Do not apply the migration to production until explicitly approved and tested.
+
+No payment gateway secrets, checkout URLs, webhook, or automated payment verification are required. The app does not automatically mark any customer payment as received.
