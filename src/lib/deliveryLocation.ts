@@ -28,7 +28,7 @@ export const LOCATION_TYPE_OPTIONS: { value: LocationType; label: string; descri
   {
     value: 'on-campus',
     label: 'On-campus hostel',
-    description: 'A hostel within the LAUTECH campus.',
+    description: 'A hostel within the institution's campus.',
   },
   {
     value: 'off-campus',
@@ -38,7 +38,7 @@ export const LOCATION_TYPE_OPTIONS: { value: LocationType; label: string; descri
   {
     value: 'other',
     label: 'Other location',
-    description: 'A faculty office, shop, gate or other agreed spot.',
+    description: 'A faculty office, shop, gate or other agreed delivery point.',
   },
 ];
 
