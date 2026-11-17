@@ -15,6 +15,7 @@ export default function IndividualOrderList() {
   const [orders, setOrders] = useState<IndividualOrderRow[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [filter, setFilter] = useState<BulkStatus | 'All'>('All');
+  const [institutionFilter, setInstitutionFilter] = useState('All');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -31,7 +32,11 @@ export default function IndividualOrderList() {
     load();
   }, [load]);
 
-  const visible = filter === 'All' ? orders : orders.filter((order) => order.status === filter);
+  const institutions = [...new Set(orders.map((order) => order.institution_name_snapshot || '__community__'))].sort((a, b) => a.localeCompare(b));
+  const visible = orders.filter((order) =>
+    (filter === 'All' || order.status === filter) &&
+    (institutionFilter === 'All' || (order.institution_name_snapshot || '__community__') === institutionFilter)
+  );
   const selected = orders.find((order) => order.id === selectedId) ?? null;
 
   return (
@@ -52,6 +57,15 @@ export default function IndividualOrderList() {
             ))}
           </select>
         </label>
+        {!institutionAdmin && institutions.length > 1 && (
+          <label className="flex items-center gap-2 text-sm font-bold text-navy-900">
+            Institution
+            <select value={institutionFilter} onChange={(event) => setInstitutionFilter(event.target.value)} className="rounded-xl border border-navy-200 bg-white px-3 py-2 text-sm font-semibold text-navy-900">
+              <option value="All">All institutions</option>
+              {institutions.map((name) => <option key={name} value={name}>{name === '__community__' ? 'Community / unassigned' : name}</option>)}
+            </select>
+          </label>
+        )}
         <button
           type="button"
           onClick={load}
