@@ -7,6 +7,9 @@ export interface DeliveryPartner {
   full_name: string;
   whatsapp: string;
   active: boolean;
+  bank_name?: string;
+  bank_account_name?: string;
+  bank_account_number?: string;
 }
 
 export interface PartnerOrder {
@@ -38,7 +41,7 @@ interface AssignmentQueryRow {
 export async function fetchDeliveryPartner(userId: string): Promise<DeliveryPartner | null> {
   const { data, error } = await getSupabase()
     .from('delivery_partners')
-    .select('id, full_name, whatsapp, active')
+    .select('id, full_name, whatsapp, active, bank_name, bank_account_name, bank_account_number')
     .eq('user_id', userId)
     .maybeSingle();
 
@@ -197,6 +200,7 @@ export async function recordPartnerCollection(
   method: 'bank_transfer' | 'cash_collected',
   reference?: string,
 ): Promise<void> {
+  if (!Number.isFinite(amountNaira) || amountNaira < 0 || method !== 'bank_transfer') throw new Error('Enter a valid bank-transfer collection amount.');
   const { error } = await getSupabase().rpc('admin_record_partner_collection', {
     p_order_id: orderId, p_amount_kobo: Math.round(amountNaira * 100),
     p_method: method, p_reference: reference ?? null,
@@ -215,4 +219,15 @@ export async function recordPartnerRemittance(
     p_reference: reference ?? null, p_note: note ?? null,
   });
   if (error) throw new Error(error.message || 'Remittance could not be recorded.');
+}
+
+export async function updateOwnPartnerBankDetails(details: {
+  bank_name: string; bank_account_name: string; bank_account_number: string;
+}): Promise<void> {
+  const { error } = await getSupabase().rpc('partner_update_own_bank_details', {
+    p_bank_name: details.bank_name,
+    p_account_name: details.bank_account_name,
+    p_account_number: details.bank_account_number,
+  });
+  if (error) throw new Error(error.message || 'Your bank details could not be saved.');
 }
