@@ -7,6 +7,7 @@ import type { ServiceField } from '@/data/services';
 import { sendPasswordReset, signInWithPassword, signUpWithPassword } from '@/lib/auth';
 import { valuesToProfile } from '@/lib/customerProfile';
 import { saveCustomerProfile } from '@/lib/customerProfileRepository';
+import { getSupabase } from '@/lib/supabase';
 import { omitErrors, validateFields, type FieldErrors } from '@/lib/validation';
 
 export type AuthMode = 'signin' | 'signup' | 'forgot';
@@ -98,7 +99,9 @@ export default function AuthForm({ initialMode, onDone }: AuthFormProps) {
         await signInWithPassword(email, values.password);
         if (pendingProfile) {
           try {
-            await saveCustomerProfile((await import('@/lib/supabase')).getSupabase().auth.getUser ? (await (await import('@/lib/supabase')).getSupabase().auth.getUser()).data.user?.id ?? '' : '', valuesToProfile(values));
+            const { data: { user } } = await getSupabase().auth.getUser();
+            if (!user) throw new Error('Your sign-in session could not be verified.');
+            await saveCustomerProfile(user.id, valuesToProfile(values));
             setPendingProfile(false);
           } catch {
             setFormError('You are signed in, but your registration details could not be saved. Open My profile and complete the required fields.');
