@@ -1,10 +1,11 @@
 import { type ReactNode } from 'react';
-import { Building2, ClipboardList, FileText, LogOut, MapPinned, MessageSquare, Package, ShieldAlert, Tags, Truck, Users } from 'lucide-react';
+import { Building2, ClipboardList, FileText, LogOut, MapPinned, MessageSquare, Package, ShieldAlert, Tags, Truck, Users, Wallet } from 'lucide-react';
 import AdminSignIn from '@/components/admin/AdminSignIn';
 import BulkRequestList from '@/components/admin/BulkRequestList';
 import CustomerList from '@/components/admin/CustomerList';
 import DeliveryPartnerManager from '@/components/admin/DeliveryPartnerManager';
 import PartnerFinancials from '@/components/admin/PartnerFinancials';
+import FinanceAccounting from '@/components/admin/FinanceAccounting';
 import EnquiryInbox from '@/components/admin/EnquiryInbox';
 import HostelManager from '@/components/admin/HostelManager';
 import IndividualOrderList from '@/components/admin/IndividualOrderList';
@@ -21,7 +22,7 @@ import { signOut } from '@/lib/auth';
 
 export type AdminSection =
   | 'bulk-requests' | 'orders' | 'customers' | 'services' | 'pricing'
-  | 'locations' | 'partners' | 'partner-finances' | 'messages' | 'institutions' | 'payment-settings';
+  | 'locations' | 'partners' | 'partner-finances' | 'finance-accounting' | 'messages' | 'institutions' | 'payment-settings';
 
 const MAIN_SECTIONS = [
   { value: 'bulk-requests', label: 'Bulk requests', icon: Package },
@@ -32,6 +33,7 @@ const MAIN_SECTIONS = [
   { value: 'locations', label: 'Hostels', icon: MapPinned },
   { value: 'partners', label: 'Delivery partners', icon: Truck },
   { value: 'partner-finances', label: 'Partner finances', icon: Truck },
+  { value: 'finance-accounting', label: 'Finance & accounting', icon: Wallet },
   { value: 'institutions', label: 'Institutions', icon: Building2 },
   { value: 'payment-settings', label: 'Payment settings', icon: FileText },
   { value: 'messages', label: 'Messages', icon: MessageSquare },
@@ -71,6 +73,7 @@ function SectionContent({ section, onMessagesChanged }: { section: AdminSection;
   if (section === 'pricing') return <PriceManager />;
   if (section === 'partners') return <DeliveryPartnerManager />;
   if (section === 'partner-finances') return <PartnerFinancials />;
+  if (section === 'finance-accounting') return <FinanceAccounting />;
   if (section === 'institutions') return <InstitutionManager />;
   if (section === 'payment-settings') return <PaymentSettingsPage />;
   if (section === 'messages') return <EnquiryInbox onChanged={onMessagesChanged} />;
