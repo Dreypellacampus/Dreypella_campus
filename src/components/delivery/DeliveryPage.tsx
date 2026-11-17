@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, Clock, Truck, Wallet } from 'lucide-react';
 import { PageShell } from '@/components/account/SignedOutPrompt';
 import { AssignmentCard, SummaryCard } from '@/components/delivery/DeliveryCards';
+import PartnerBankDetails from '@/components/delivery/PartnerBankDetails';
 import { useCustomerSession } from '@/hooks/useCustomerSession';
 import { formatNaira } from '@/lib/format';
 import {
@@ -145,6 +146,8 @@ export default function DeliveryPage() {
             Your assigned deliveries are below. Mark an order as delivered once the customer has received it.
           </p>
         </div>
+
+        <PartnerBankDetails partner={partner} />
 
         <div className="grid gap-4 sm:grid-cols-3">
           <SummaryCard icon={Wallet} label="Earned" value={formatNaira(summary.earned)} tone="emerald" />
