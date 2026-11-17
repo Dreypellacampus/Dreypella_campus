@@ -1,7 +1,7 @@
 import { getSupabase } from '@/lib/supabase';
 import type { CustomerProfile } from '@/lib/customerProfile';
 
-const PROFILE_COLUMNS = 'id, full_name, whatsapp, preferred_address, institution, institution_id, department, student_status, customer_category, level_of_study, institution_submission';
+const PROFILE_COLUMNS = 'id, full_name, whatsapp, preferred_address, area, institution, institution_id, department, student_status, customer_category, level_of_study, institution_submission';
 
 export async function fetchCustomerProfile(userId: string): Promise<CustomerProfile | null> {
   const { data, error } = await getSupabase()
