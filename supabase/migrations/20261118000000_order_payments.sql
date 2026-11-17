@@ -78,8 +78,8 @@ DECLARE
   v_reference text := 'DPC-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 12));
 BEGIN
   IF v_user_id IS NULL THEN RAISE EXCEPTION 'Sign in to submit payment.' USING ERRCODE = '42501'; END IF;
-  IF p_method NOT IN ('bank_transfer', 'cash') THEN RAISE EXCEPTION 'Unsupported payment method.'; END IF;
-  IF p_method = 'bank_transfer' AND (coalesce(trim(p_sender_name), '') = '' OR coalesce(trim(p_transfer_reference), '') = '') THEN
+  IF p_method <> 'bank_transfer' THEN RAISE EXCEPTION 'Only bank transfer is accepted.'; END IF;
+  IF coalesce(trim(p_sender_name), '') = '' OR coalesce(trim(p_transfer_reference), '') = '' THEN
     RAISE EXCEPTION 'Enter the sender name and bank transfer reference.';
   END IF;
   SELECT q.amount INTO v_amount
