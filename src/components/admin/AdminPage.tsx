@@ -106,8 +106,8 @@ export default function AdminPage({ section }: { section: AdminSection }) {
             <span className="text-3xl font-extrabold text-red-500">{unanswered.count ?? '-'}</span>
           </Link>
         )}
-        <nav aria-label="Admin sections" className="flex gap-2 overflow-x-auto border-b border-navy-100">
-          {sections.map((item) => <Link key={item.value} to={`/admin/${item.value}`} aria-current={item.value === section ? 'page' : undefined} className={`-mb-px whitespace-nowrap border-b-2 px-4 py-3 text-sm font-bold transition ${item.value === section ? 'border-red-500 text-navy-900' : 'border-transparent text-navy-600 hover:text-navy-900'}`}>{item.label}{item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">{unanswered.count}</span>}</Link>)}
+        <nav aria-label="Admin sections" tabIndex={0} className="flex max-w-full gap-1 overflow-x-auto overscroll-x-contain border-b border-navy-100 whitespace-nowrap">
+          {sections.map((item) => <Link key={item.value} to={`/admin/${item.value}`} aria-current={item.value === section ? 'page' : undefined} className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-bold transition ${item.value === section ? 'border-red-500 text-navy-900' : 'border-transparent text-navy-600 hover:text-navy-900'}`}>{item.label}{item.value === 'messages' && unanswered.count !== null && unanswered.count > 0 && <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">{unanswered.count}</span>}</Link>)}
         </nav>
         <SectionContent section={section} onMessagesChanged={unanswered.reload} />
       </div>
