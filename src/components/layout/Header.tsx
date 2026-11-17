@@ -62,7 +62,7 @@ export default function Header() {
         scrolled ? 'border-navy-100 shadow-md shadow-navy-900/5' : 'border-transparent'
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
         <Link to={homeHref} aria-label="DREYPELLA CAMPUS home" onClick={closeMenu}>
           <Logo />
         </Link>
@@ -75,7 +75,7 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {signedIn ? (
             <>
               <Link
@@ -87,7 +87,7 @@ export default function Header() {
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="hidden rounded-full px-4 py-2 text-sm font-bold text-navy-900 transition hover:bg-navy-50 md:inline-flex"
+                className="inline-flex items-center rounded-full border border-navy-200 px-3 py-2 text-xs font-bold text-navy-900 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 sm:px-4 sm:text-sm"
               >
                 Log out
               </button>
@@ -111,7 +111,7 @@ export default function Header() {
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-navy-900 transition hover:bg-navy-50 md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-navy-900 transition hover:bg-navy-50 md:hidden"
           >
             {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -120,8 +120,8 @@ export default function Header() {
 
       <div
         id="mobile-menu"
-        className={`overflow-hidden border-t border-navy-100 bg-white transition-all duration-300 md:hidden ${
-          menuOpen ? 'max-h-[32rem] opacity-100' : 'max-h-0 border-transparent opacity-0'
+        className={`max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-navy-100 bg-white transition-all duration-300 md:hidden ${
+          menuOpen ? 'opacity-100' : 'max-h-0 border-transparent opacity-0'
         }`}
       >
         <nav aria-label="Mobile" className="flex flex-col gap-1 px-4 py-4">
@@ -134,14 +134,9 @@ export default function Header() {
             ORDER NOW
           </Button>
           {signedIn ? (
-            <>
-              <Link to="/profile" onClick={closeMenu} className={MOBILE_LINK_CLASS}>
-                My profile
-              </Link>
-              <button type="button" onClick={handleSignOut} className={MOBILE_LINK_CLASS}>
-                Log out
-              </button>
-            </>
+            <Link to="/profile" onClick={closeMenu} className={MOBILE_LINK_CLASS}>
+              My profile
+            </Link>
           ) : (
             session.status === 'signed-out' && (
               <Link to="/login" onClick={closeMenu} className={MOBILE_LINK_CLASS}>
