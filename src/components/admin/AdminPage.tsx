@@ -4,6 +4,7 @@ import AdminSignIn from '@/components/admin/AdminSignIn';
 import BulkRequestList from '@/components/admin/BulkRequestList';
 import CustomerList from '@/components/admin/CustomerList';
 import DeliveryPartnerManager from '@/components/admin/DeliveryPartnerManager';
+import PartnerFinancials from '@/components/admin/PartnerFinancials';
 import EnquiryInbox from '@/components/admin/EnquiryInbox';
 import HostelManager from '@/components/admin/HostelManager';
 import IndividualOrderList from '@/components/admin/IndividualOrderList';
@@ -20,7 +21,7 @@ import { signOut } from '@/lib/auth';
 
 export type AdminSection =
   | 'bulk-requests' | 'orders' | 'customers' | 'services' | 'pricing'
-  | 'locations' | 'partners' | 'messages' | 'institutions' | 'payment-settings';
+  | 'locations' | 'partners' | 'partner-finances' | 'messages' | 'institutions' | 'payment-settings';
 
 const MAIN_SECTIONS = [
   { value: 'bulk-requests', label: 'Bulk requests', icon: Package },
@@ -30,6 +31,7 @@ const MAIN_SECTIONS = [
   { value: 'pricing', label: 'Prices', icon: Tags },
   { value: 'locations', label: 'Hostels', icon: MapPinned },
   { value: 'partners', label: 'Delivery partners', icon: Truck },
+  { value: 'partner-finances', label: 'Partner finances', icon: Truck },
   { value: 'institutions', label: 'Institutions', icon: Building2 },
   { value: 'payment-settings', label: 'Payment settings', icon: FileText },
   { value: 'messages', label: 'Messages', icon: MessageSquare },
@@ -68,6 +70,7 @@ function SectionContent({ section, onMessagesChanged }: { section: AdminSection;
   if (section === 'services') return <ServiceOverview />;
   if (section === 'pricing') return <PriceManager />;
   if (section === 'partners') return <DeliveryPartnerManager />;
+  if (section === 'partner-finances') return <PartnerFinancials />;
   if (section === 'institutions') return <InstitutionManager />;
   if (section === 'payment-settings') return <PaymentSettingsPage />;
   if (section === 'messages') return <EnquiryInbox onChanged={onMessagesChanged} />;
