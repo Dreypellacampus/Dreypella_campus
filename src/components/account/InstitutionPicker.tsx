@@ -6,9 +6,11 @@ interface InstitutionPickerProps {
   value: string;
   nameValue: string;
   onChange: (id: string, name: string) => void;
+  required?: boolean;
+  error?: string;
 }
 
-export default function InstitutionPicker({ value, nameValue, onChange }: InstitutionPickerProps) {
+export default function InstitutionPicker({ value, nameValue, onChange, required = false, error }: InstitutionPickerProps) {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [query, setQuery] = useState(nameValue);
   const [loadError, setLoadError] = useState(false);
@@ -40,7 +42,7 @@ export default function InstitutionPicker({ value, nameValue, onChange }: Instit
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor="institution-search" className="text-sm font-bold text-navy-900">
-        Institution or workplace <span className="font-normal text-navy-600">(optional for non-students)</span>
+        Institution {required ? <span className="text-red-500">*</span> : <span className="font-normal text-navy-600">(optional for non-students)</span>}
       </label>
       <div className="relative">
         <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-500" aria-hidden="true" />
@@ -75,6 +77,7 @@ export default function InstitutionPicker({ value, nameValue, onChange }: Instit
         </div>
       )}
       {value && <p className="text-xs font-semibold text-emerald-700">Selected: {nameValue}</p>}
+      {error && <p role="alert" className="text-sm font-semibold text-red-600">{error}</p>}
       {!value && query.trim() && filtered.length === 0 && <p className="text-xs text-navy-600">Not listed? Leave this blank and enter the name for review below.</p>}
     </div>
   );
