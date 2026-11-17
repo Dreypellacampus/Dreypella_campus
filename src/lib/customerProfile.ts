@@ -5,6 +5,7 @@ export interface CustomerProfile {
   full_name: string;
   whatsapp: string;
   preferred_address: string | null;
+  area: string | null;
   institution: string | null;
   institution_id: string | null;
   department: string | null;
@@ -28,6 +29,7 @@ export function profileToValues(profile: CustomerProfile | null): Record<string,
     fullName: profile?.full_name ?? '',
     whatsapp: profile?.whatsapp ?? '',
     preferredAddress: profile?.preferred_address ?? '',
+    area: profile?.area ?? '',
     institution: profile?.institution ?? '',
     institutionId: profile?.institution_id ?? '',
     department: profile?.department ?? '',
@@ -43,6 +45,7 @@ export function valuesToProfile(values: Record<string, string>): CustomerProfile
     full_name: values.fullName.trim(),
     whatsapp: toLocalWhatsapp(values.whatsapp),
     preferred_address: optionalText(values.preferredAddress),
+    area: optionalText(values.area),
     institution: optionalText(values.institution),
     institution_id: optionalText(values.institutionId),
     department: optionalText(values.department),
